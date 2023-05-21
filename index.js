@@ -1,10 +1,11 @@
 
 const express = require('express')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors')
 require('dotenv').config()
 const app = express()
 app.use(cors())
+app.use(express.json())
 const port = 5000;
 
 
@@ -24,10 +25,25 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const toysCollection = client.db("toysDB").collection("toys")
-
+        app.get('/alltoys', async(req,res)=>{
+            const cursor = await toysCollection.find({}).toArray();
+            res.send(cursor);
+        });
         app.get('/toys/:text', async(req,res)=>{
             const sub_category=req.params.text
             const query={sub_category:sub_category}
+            const cursor = await toysCollection.find(query).toArray();
+            res.send(cursor);
+        });
+        app.get('/toy-details/:id', async(req,res)=>{
+            const id=req.params.id
+            const query={_id:new ObjectId(id)}
+            const cursor = await toysCollection.findOne(query)
+            res.send(cursor);
+        });
+        app.get('/my-toys/:text', async(req,res)=>{
+            const email=req.params.text
+            const query={seller_email:email}
             const cursor = await toysCollection.find(query).toArray();
             res.send(cursor);
         });
