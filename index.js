@@ -32,7 +32,11 @@ async function run() {
         const toysIndex=await toysCollection.createIndex(indexKeys,indexOption)
 
 
-
+        app.post('/add', async(req,res)=>{
+            const result=await toysCollection.insertOne(req.body)
+            // console.log(req.body);
+            res.send(result)
+        });
         app.get('/alltoys', async(req,res)=>{
             const cursor = await toysCollection.find({}).toArray();
             res.send(cursor);
