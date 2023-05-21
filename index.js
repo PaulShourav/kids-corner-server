@@ -44,22 +44,49 @@ async function run() {
             res.send(result)
            
           })
+          app.get('/edit/:id',async(req,res)=>{
+            const id=req.params.id
+            const query={_id:new ObjectId(id)}
+            const result=await toysCollection.findOne(query);
+            res.send(result)
+            
+          });
+          app.put('/update/:id',async(req,res)=>{
+            const id=req.params.id
+            const toy=req.body
+            const filter={_id:new ObjectId(id)}
+            const options={upsert:true}
+            const updateUser={
+              $set:{
+                name:toy.name,
+                image:toy.image,
+                sub_category:toy.sub_category,
+                price:toy.price,
+                rating:toy.rating,
+                quantity:toy.quantity,
+                description:toy.description,
+              }
+            }
+            const result =await toysCollection.updateOne(filter,updateUser,options)
+            res.send(result)
+           
+          })
         app.get('/alltoys', async(req,res)=>{
             const cursor = await toysCollection.find({}).toArray();
             res.send(cursor);
         });
-        app.get('/search/:text', async(req,res)=>{
+        app.get('/toys/:text', async(req,res)=>{
             const sub_category=req.params.text
             const query={sub_category:sub_category}
             const cursor = await toysCollection.find(query).toArray();
             res.send(cursor);
         });
-        app.get('/toys/:text', async(req,res)=>{
+        app.get('/search/:text', async(req,res)=>{
             const searchText=req.params.text
             const query={
                 $or:[
-                    {name:{$regax:searchText,$option:"i"}},
-                    {sub_category:{$regax:searchText,$option:"i"}}
+                    {name:{$regex:searchText,$options:"i"}},
+                    {sub_category:{$regex:searchText,$options:"i"}}
                 ]
             }
             const cursor = await toysCollection.find(query).toArray();
@@ -89,10 +116,7 @@ async function run() {
 run().catch(console.dir);
 
 
-
-
-
-app.get('/', (req, res) => {
+app.get('/', ( res) => {
     res.send('hello world')
 })
 
