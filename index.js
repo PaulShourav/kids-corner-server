@@ -3,15 +3,15 @@ const cors = require('cors')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
-const corsConfig={
-    origin: '',
-    credentials:true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-}
+// const corsConfig={
+//     origin: '',
+//     credentials:true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+// }
  
 const app = express()
-app.use(cors(corsConfig))
-app.options("",cors(corsConfig))
+app.use(cors())
+// app.options("",cors(corsConfig))
 app.use(express.json())
 const port =process.env.PORT || 5000;
 
