@@ -3,15 +3,8 @@ const cors = require('cors')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
-// const corsConfig={
-//     origin: '',
-//     credentials:true,
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-// }
- 
 const app = express()
-app.use(cors())
-// app.options("",cors(corsConfig))
+ app.use(cors())
 app.use(express.json())
 const port =process.env.PORT || 5000;
 
@@ -38,6 +31,39 @@ async function run() {
         const indexOption={name:"nameSubCategory"}
         const toysIndex=await toysCollection.createIndex(indexKeys,indexOption)
 
+        app.get('/alltoys', async(req,res)=>{
+            const cursor = await toysCollection.find({}).toArray();
+            res.send(cursor);
+        });
+        app.get('/toys/:text', async(req,res)=>{
+            const sub_category=req.params.text
+            const query={sub_category:sub_category}
+            const cursor = await toysCollection.find(query).toArray();
+            res.send(cursor);
+        });
+        app.get('/search/:text', async(req,res)=>{
+            const searchText=req.params.text
+            const query={
+                $or:[
+                    {name:{$regex:searchText,$options:"i"}},
+                    {sub_category:{$regex:searchText,$options:"i"}}
+                ]
+            }
+            const cursor = await toysCollection.find(query).toArray();
+            res.send(cursor);
+        });
+        app.get('/toy-details/:id', async(req,res)=>{
+            const id=req.params.id
+            const query={_id:new ObjectId(id)}
+            const cursor = await toysCollection.findOne(query)
+            res.send(cursor);
+        });
+        app.get('/my-toys/:text', async(req,res)=>{
+            const email=req.params.text
+            const query={seller_email:email}
+            const cursor = await toysCollection.find(query).toArray();
+            res.send(cursor);
+        });
 
         app.post('/add', async(req,res)=>{
             const result=await toysCollection.insertOne(req.body)
@@ -77,40 +103,7 @@ async function run() {
             res.send(result)
            
           })
-        app.get('/alltoys', async(req,res)=>{
-            const cursor = await toysCollection.find({}).toArray();
-            res.send(cursor);
-        });
-        app.get('/toys/:text', async(req,res)=>{
-            const sub_category=req.params.text
-            const query={sub_category:sub_category}
-            const cursor = await toysCollection.find(query).toArray();
-            res.send(cursor);
-        });
-        app.get('/search/:text', async(req,res)=>{
-            const searchText=req.params.text
-            const query={
-                $or:[
-                    {name:{$regex:searchText,$options:"i"}},
-                    {sub_category:{$regex:searchText,$options:"i"}}
-                ]
-            }
-            const cursor = await toysCollection.find(query).toArray();
-            res.send(cursor);
-        });
-        app.get('/toy-details/:id', async(req,res)=>{
-            const id=req.params.id
-            const query={_id:new ObjectId(id)}
-            const cursor = await toysCollection.findOne(query)
-            res.send(cursor);
-        });
-        app.get('/my-toys/:text', async(req,res)=>{
-            const email=req.params.text
-            const query={seller_email:email}
-            const cursor = await toysCollection.find(query).toArray();
-            res.send(cursor);
-        });
-
+      
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
